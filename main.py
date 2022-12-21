@@ -1,6 +1,7 @@
 import copy
 import compare
 import train
+import torch
 
 
 def main():
@@ -15,10 +16,10 @@ def main():
     data_1, data_2, val_data, _ = train.get_dataset_split(device)
     model_1 = train.get_model(ntokens, emsize, d_hid, nlayers, nhead, dropout)
     model_2 = copy.deepcopy(model_1)
-    #model_1_trained = train.train(model_1, data_1, device, name='1')
-    #model_2_trained = train.train(model_2, data_2, device, name='2')
-    model_1_trained = model_1
-    model_2_trained = model_2
+    model_1_trained = train.train(model_1, data_1, device, name='1')
+    model_2_trained = train.train(model_2, data_2, device, name='2')
+    #model_1_trained = torch.load('checkpoints/model_1.pt')
+    #model_2_trained = torch.load('checkpoints/model_2.pt')
     model_1_trained.to(device)
     loss_1 = train.evaluate(model_1_trained, val_data, device)
     model_2_trained.to(device)
