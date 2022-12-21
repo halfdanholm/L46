@@ -2,7 +2,7 @@
 # Load and batch data
 # -------------------
 #
-
+import torchtext
 
 ######################################################################
 # This tutorial uses ``torchtext`` to generate Wikitext-2 dataset.
@@ -195,13 +195,14 @@ def train_epoch(model: nn.Module, ntokens: int, epoch: int, criterion, optimizer
             start_time = time.time()
 
 
-def evaluate(model: nn.Module, eval_data: Tensor, ntokens: int, criterion, bptt, device) -> float:
+def evaluate(model: nn.Module, eval_data: Tensor, device, ntokens: int = 28782, criterion=nn.CrossEntropyLoss(),
+             bptt: int = 35) -> float:
     model.eval()  # turn on evaluation mode
     total_loss = 0.
     src_mask = generate_square_subsequent_mask(bptt).to(device)
     with torch.no_grad():
         for i in range(0, eval_data.size(0) - 1, bptt):
-            data, targets = get_batch(eval_data, i)
+            data, targets = get_batch(eval_data, i, bptt)
             seq_len = data.size(0)
             if seq_len != bptt:
                 src_mask = src_mask[:seq_len, :seq_len]
@@ -211,7 +212,7 @@ def evaluate(model: nn.Module, eval_data: Tensor, ntokens: int, criterion, bptt,
     return total_loss / (len(eval_data) - 1)
 
 
-# Generates text from a model. Generated with Codex
+"""# Generates text from a model. Generated with Codex
 def generate_text(model: nn.Module, prompt: str, num_words: int, temperature: float = 1.0) -> str:
     model.eval()  # turn on evaluation mode
     with torch.no_grad():
@@ -231,15 +232,14 @@ def generate_text(model: nn.Module, prompt: str, num_words: int, temperature: fl
             probs = F.softmax(logits / temperature, dim=-1)
             # Sample the next word
             next_word = torch.multinomial(probs, num_samples=1).item()
-            return next_word, next_state
+            return next_word, next_state"""
 
 
 ######################################################################
 # Loop over epochs. Save the model if the validation loss is the best
 # we've seen so far. Adjust the learning rate after each epoch.
 
-def train(model: nn.Module, epochs: int) -> None:
-    bptt = 35
+def get_dataset_split(device):
     train_iter = WikiText2(split='train')
     tokenizer = get_tokenizer('basic_english')
     vocab = build_vocab_from_iterator(map(tokenizer, train_iter), specials=['<unk>'])
@@ -252,54 +252,31 @@ def train(model: nn.Module, epochs: int) -> None:
     val_data = data_process(val_iter, vocab, tokenizer)
     test_data = data_process(test_iter, vocab, tokenizer)
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'mps')
-
     batch_size = 20
     eval_batch_size = 10
     train_data = batchify(train_data, batch_size, device)  # shape [seq_len, batch_size]
     val_data = batchify(val_data, eval_batch_size, device)
     test_data = batchify(test_data, eval_batch_size, device)
 
-    ntokens = len(vocab)  # size of vocabulary
+    data_1, data_2, _ = train_data.split(train_data.size(0) // 2, dim=0)
+    return data_1, data_2, val_data, test_data
+
+
+def get_device():
+    return torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.has_mps else 'cpu')
+
+
+def train(model: nn.Module, train_data, device, name: str = "1", epochs: int = 1, ntokens: int = 28782) -> nn.Module:
     criterion = nn.CrossEntropyLoss()
     lr = 5.0  # learning rate
     optimizer = torch.optim.SGD(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.95)
-
-    best_val_loss = float('inf')
-    best_model = None
+    bptt = 35
 
     model.to(device)
-
     for epoch in range(1, epochs + 1):
-        epoch_start_time = time.time()
         train_epoch(model, ntokens, epoch, criterion, optimizer, scheduler, train_data, bptt, device)
-        val_loss = evaluate(model, val_data, ntokens, criterion, bptt, device)
-        val_ppl = math.exp(val_loss)
-        elapsed = time.time() - epoch_start_time
-        print('-' * 89)
-        print(f'| end of epoch {epoch:3d} | time: {elapsed:5.2f}s | '
-              f'valid loss {val_loss:5.2f} | valid ppl {val_ppl:8.2f}')
-        print('-' * 89)
-
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            best_model = copy.deepcopy(model)
-
-        torch.save(best_model, f'checkpoints/model_epoch{epoch}.pt')
-
         scheduler.step()
+    torch.save(model, f'checkpoints/model_{name}.pt')
 
-    ######################################################################
-    # Evaluate the best model on the test dataset
-    # -------------------------------------------
-    #
-
-    torch.save(best_model, 'checkpoints/model.pt')
-
-    test_loss = evaluate(best_model, test_data, ntokens, criterion, bptt, device)
-    test_ppl = math.exp(test_loss)
-    print('=' * 89)
-    print(f'| End of training | test loss {test_loss:5.2f} | '
-          f'test ppl {test_ppl:8.2f}')
-    print('=' * 89)
+    return model
