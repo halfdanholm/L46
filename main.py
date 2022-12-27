@@ -38,5 +38,6 @@ def main():
     print(f'Loss average: {loss_av}')
 
 
+
 if __name__ == '__main__':
     main()
