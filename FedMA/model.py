@@ -144,24 +144,28 @@ class SimpleCNN(nn.Module):
 class SimpleCNNMNIST(nn.Module):
     def __init__(self, input_dim, hidden_dims, output_dim=10):
         super(SimpleCNNMNIST, self).__init__()
-        self.conv1 = nn.Conv2d(1, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
+        #self.conv1 = nn.Conv2d(1, 6, 5)
+        #self.pool = nn.MaxPool2d(2, 2)
+        #self.conv2 = nn.Conv2d(6, 16, 5)
         
         # for now, we hard coded this network
         # i.e. we fix the number of hidden layers i.e. 2 layers
         self.fc1 = nn.Linear(input_dim, hidden_dims[0])
         self.fc2 = nn.Linear(hidden_dims[0], hidden_dims[1])
-        self.fc3 = nn.Linear(hidden_dims[1], output_dim)
+        self.fc3 = nn.Linear(hidden_dims[1], hidden_dims[2])
+        self.fc4 = nn.Linear(hidden_dims[2], hidden_dims[3])
+        self.fc5 = nn.Linear(hidden_dims[3], output_dim)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 4 * 4)
+        #x = self.pool(F.relu(self.conv1(x)))
+        #x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 28 * 28)
 
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc4(x))
+        x = self.fc5(x)
         return x
 
 

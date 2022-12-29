@@ -88,7 +88,6 @@ def trans_next_conv_layer_forward(layer_weight, next_layer_shape):
 
 def trans_next_conv_layer_backward(layer_weight, next_layer_shape):
     reconstructed_next_layer_shape = (next_layer_shape[1], next_layer_shape[0], next_layer_shape[2], next_layer_shape[3])
-    print("layer_weight.shape:", layer_weight.shape, "reconstructed_next_layer_shape", reconstructed_next_layer_shape)
     reshaped = layer_weight.reshape(reconstructed_next_layer_shape).transpose(1, 0, 2, 3).reshape(next_layer_shape[0], -1)
     return reshaped
 
@@ -204,10 +203,16 @@ def local_retrain_dummy(local_datasets, weights, args, mode="bottom-up", freezin
         elif args.dataset == "mnist":
             input_channel = 1
 
-        num_filters = [weights[0].shape[0], weights[2].shape[0]]
-        input_dim = weights[4].shape[0]
-        hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
-        matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
+        if args.dataset == "mnist":
+            num_filters = []
+            input_dim = weights[0].shape[0]
+            hidden_dims = [weights[0].shape[1], weights[2].shape[1], weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNMNIST(input_dim=input_dim, hidden_dims=hidden_dims, output_dim=10)
+        else:
+            num_filters = [weights[0].shape[0], weights[2].shape[0]]
+            input_dim = weights[4].shape[0]
+            hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
                                         num_filters=num_filters, 
                                         kernel_size=5, 
                                         input_dim=input_dim, 
@@ -435,10 +440,16 @@ def local_retrain(local_datasets, weights, args, mode="bottom-up", freezing_inde
         elif args.dataset == "mnist":
             input_channel = 1
 
-        num_filters = [weights[0].shape[0], weights[2].shape[0]]
-        input_dim = weights[4].shape[0]
-        hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
-        matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
+        if args.dataset == "mnist":
+            num_filters = []
+            input_dim = weights[0].shape[0]
+            hidden_dims = [weights[0].shape[1], weights[2].shape[1], weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNMNIST(input_dim=input_dim, hidden_dims=hidden_dims, output_dim=10)
+        else:
+            num_filters = [weights[0].shape[0], weights[2].shape[0]]
+            input_dim = weights[4].shape[0]
+            hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
                                         num_filters=num_filters, 
                                         kernel_size=5, 
                                         input_dim=input_dim, 
@@ -627,7 +638,7 @@ def local_retrain(local_datasets, weights, args, mode="bottom-up", freezing_inde
                     temp_dict = {key_name: torch.from_numpy(weights[param_idx].T)}
                 elif "bias" in key_name:
                     temp_dict = {key_name: torch.from_numpy(weights[param_idx])}
-        
+
         new_state_dict.update(temp_dict)
     matched_cnn.load_state_dict(new_state_dict)
 
@@ -740,10 +751,16 @@ def local_retrain_fedavg(local_datasets, weights, args, device="cpu"):
         elif args.dataset == "mnist":
             input_channel = 1
 
-        num_filters = [weights[0].shape[0], weights[2].shape[0]]
-        input_dim = weights[4].shape[0]
-        hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
-        matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
+        if args.dataset == "mnist":
+            num_filters = []
+            input_dim = weights[0].shape[0]
+            hidden_dims = [weights[0].shape[1], weights[2].shape[1], weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNMNIST(input_dim=input_dim, hidden_dims=hidden_dims, output_dim=10)
+        else:
+            num_filters = [weights[0].shape[0], weights[2].shape[0]]
+            input_dim = weights[4].shape[0]
+            hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
                                         num_filters=num_filters, 
                                         kernel_size=5, 
                                         input_dim=input_dim, 
@@ -849,10 +866,16 @@ def local_retrain_fedprox(local_datasets, weights, mu, args, device="cpu"):
         elif args.dataset == "mnist":
             input_channel = 1
 
-        num_filters = [weights[0].shape[0], weights[2].shape[0]]
-        input_dim = weights[4].shape[0]
-        hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
-        matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
+        if args.dataset == "mnist":
+            num_filters = []
+            input_dim = weights[0].shape[0]
+            hidden_dims = [weights[0].shape[1], weights[2].shape[1], weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNMNIST(input_dim=input_dim, hidden_dims=hidden_dims, output_dim=10)
+        else:
+            num_filters = [weights[0].shape[0], weights[2].shape[0]]
+            input_dim = weights[4].shape[0]
+            hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
                                         num_filters=num_filters, 
                                         kernel_size=5, 
                                         input_dim=input_dim, 
@@ -964,11 +987,17 @@ def reconstruct_local_net(weights, args, ori_assignments=None, worker_index=0):
             input_channel = 3
         elif args.dataset == "mnist":
             input_channel = 1
-
-        num_filters = [weights[0].shape[0], weights[2].shape[0]]
-        input_dim = weights[4].shape[0]
-        hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
-        matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
+        
+        if args.dataset == "mnist":
+            num_filters = []
+            input_dim = weights[0].shape[0]
+            hidden_dims = [weights[0].shape[1], weights[2].shape[1], weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNMNIST(input_dim=input_dim, hidden_dims=hidden_dims, output_dim=10)
+        else:
+            num_filters = [weights[0].shape[0], weights[2].shape[0]]
+            input_dim = weights[4].shape[0]
+            hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
                                         num_filters=num_filters, 
                                         kernel_size=5, 
                                         input_dim=input_dim, 
@@ -1014,20 +1043,17 @@ def reconstruct_local_net(weights, args, ori_assignments=None, worker_index=0):
         return res_weight
 
     reconstructed_weights = []
-    for param_idx, (key_name, param) in enumerate(matched_cnn.state_dict().items()):
-        _matched_weight = weights[param_idx]
-        print("_matched_weight.shape", _matched_weight.shape)
     # handle the conv layers part which is not changing
     for param_idx, (key_name, param) in enumerate(matched_cnn.state_dict().items()):
         _matched_weight = weights[param_idx]
-        if param_idx < 1: # we need to handle the 1st conv layer specificly since the color channels are aligned
+        if param_idx < 0: # we need to handle the 1st conv layer specificly since the color channels are aligned
             _assignment = ori_assignments[int(param_idx / 2)][worker_index]
             _res_weight = __reconstruct_weights(weight=_matched_weight, assignment=_assignment, 
                                                 layer_ori_shape=param.size(), matched_num_filters=None,
                                                 weight_type="conv_weight", slice_dim="filter")
             reconstructed_weights.append(_res_weight)
 
-        elif (param_idx >= 1) and (param_idx < len(weights) -2):
+        elif (param_idx >= 0) and (param_idx < len(weights) -2):
             if "bias" in key_name: # the last bias layer is already aligned so we won't need to process it
                 _assignment = ori_assignments[int(param_idx / 2)][worker_index]
                 _res_bias = __reconstruct_weights(weight=_matched_weight, assignment=_assignment, 
@@ -1056,6 +1082,8 @@ def reconstruct_local_net(weights, args, ori_assignments=None, worker_index=0):
                 # we make a note here that for these weights, we will need to slice in both `filter` and `channel` dimensions
                 cur_assignment = ori_assignments[int(param_idx / 2)][worker_index]
                 prev_assignment = ori_assignments[int(param_idx / 2)-1][worker_index]
+                if param_idx == 0:
+                    prev_assignment = list(range(784))
                 _matched_num_filters = weights[param_idx - 2].shape[0]
 
                 if param_idx != 12: # this is the index of the first fc layer
@@ -1310,11 +1338,13 @@ def BBP_MAP(nets_list, model_meta_data, layer_type, net_dataidx_map,
                                         matching_shapes=matching_shapes, layer_type=l_type,
                                         dataset=args.dataset, network_name=args.model)
                 elif l_type == "fc":
-                    patched_weight = block_patching(batch_weights[worker_index][2 * (layer_index + 1) - 2].T, 
+                    '''patched_weight = block_patching(batch_weights[worker_index][2 * (layer_index + 1) - 2].T, 
                                         L_next, assignment[worker_index], 
                                         layer_index+1, model_meta_data,
                                         matching_shapes=matching_shapes, layer_type=l_type,
-                                        dataset=args.dataset, network_name=args.model).T
+                                        dataset=args.dataset, network_name=args.model).T'''
+                    ## use patch_weights for the first layer. Block patching was not working
+                    patched_weight = patch_weights(batch_weights[worker_index][2 * (layer_index + 1) - 2].T, L_next, assignment[worker_index]).T
 
             elif layer_index >= first_fc_index:
                 patched_weight = patch_weights(batch_weights[worker_index][2 * (layer_index + 1) - 2].T, L_next, assignment[worker_index]).T

@@ -846,7 +846,7 @@ def layer_wise_group_descent(batch_weights, layer_index, batch_frequencies, sigm
     sigma0 = sigma0_layers[layer_index - 1]
     sigma0_bias = sigma0_bias_layers[layer_index - 1]
 
-    if layer_index <= 1:
+    if layer_index < 0:
         weights_bias = [np.hstack((batch_weights[j][0], batch_weights[j][layer_index * 2 - 1].reshape(-1, 1))) for j in range(J)]
 
         sigma_inv_prior = np.array(
@@ -896,7 +896,7 @@ def layer_wise_group_descent(batch_weights, layer_index, batch_frequencies, sigm
         #sigma_inv_layer = [np.array((matching_shapes[layer_index - 2]) * [1 / sigma] + [1 / sigma_bias]) for j in range(J)]
         sigma_inv_layer = [np.array([1 / sigma_bias] + (weights_bias[j].shape[1] - 1) * [1 / sigma]) for j in range(J)]
 
-    elif (layer_index > 1 and layer_index < (n_layers - 1)):
+    elif (layer_index >= 0 and layer_index < (n_layers - 1)):
         layer_type = model_layer_type[2 * layer_index - 2]
         prev_layer_type = model_layer_type[2 * layer_index - 2 - 2]
 
@@ -929,7 +929,7 @@ def layer_wise_group_descent(batch_weights, layer_index, batch_frequencies, sigm
 
     L_next = global_weights_c.shape[0]
 
-    if layer_index <= 1:
+    if layer_index < 0:
         if n_layers == 2:
             softmax_bias, softmax_inv_sigma = process_softmax_bias(batch_weights, last_layer_const, sigma, sigma0)
             global_weights_out = [softmax_bias]
@@ -993,7 +993,7 @@ def layer_wise_group_descent(batch_weights, layer_index, batch_frequencies, sigm
 
         logger.info("#### Branch B, Layer index: {}, Global weights out shapes: {}".format(layer_index, [gwo.shape for gwo in global_weights_out]))
 
-    elif (layer_index > 1 and layer_index < (n_layers - 1)):
+    elif (layer_index >= 0 and layer_index < (n_layers - 1)):
         layer_type = model_layer_type[2 * layer_index - 2]
         gwc_shape = global_weights_c.shape
 

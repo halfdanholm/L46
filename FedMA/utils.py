@@ -899,6 +899,16 @@ def init_cnns(net_configs, n_nets):
     return cnns, model_meta_data, layer_type
 
 
+def load_models(paths):
+    cnns = []
+    for path in paths:
+        cnns.append(torch.load(path))
+    for (k, v) in cnns[0].state_dict().items():
+        model_meta_data.append(v.shape)
+        layer_type.append(k)
+        #logger.info("{} ::: Layer name: {}, layer shape: {}".format(args.model, k, v.shape))
+    return cnns, model_meta_data, layer_type
+
 def init_models(net_configs, n_nets, args):
     '''
     Initialize the local LeNets
@@ -920,7 +930,7 @@ def init_models(net_configs, n_nets, args):
             if args.dataset in ("cifar10", "cinic10"):
                 cnn = SimpleCNN(input_dim=(16 * 5 * 5), hidden_dims=[120, 84], output_dim=10)
             elif args.dataset == "mnist":
-                cnn = SimpleCNNMNIST(input_dim=(16 * 4 * 4), hidden_dims=[120, 84], output_dim=10)
+                cnn = SimpleCNNMNIST(input_dim=(28 * 28), hidden_dims=[20, 100, 120, 84], output_dim=10)
                 if cnn_i == 0:
                     print("model:\n", cnn)
         elif args.model == "moderate-cnn":

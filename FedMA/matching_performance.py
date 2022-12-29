@@ -15,7 +15,7 @@ def compute_model_averaging_accuracy(models, weights, train_dl, test_dl, n_class
         if args.dataset in ("cifar10", "cinic10"):
             avg_cnn = SimpleCNN(input_dim=(16 * 5 * 5), hidden_dims=[120, 84], output_dim=10)
         elif args.dataset == "mnist":
-            avg_cnn = SimpleCNNMNIST(input_dim=(16 * 4 * 4), hidden_dims=[120, 84], output_dim=10)
+            avg_cnn = SimpleCNNMNIST(input_dim=(28*28), hidden_dims=[20, 100, 120, 84], output_dim=10)
     elif args.model == "moderate-cnn":
         if args.dataset in ("cifar10", "cinic10"):
             avg_cnn = ModerateCNN()
@@ -234,10 +234,17 @@ def compute_full_cnn_accuracy(models, weights, train_dl, test_dl, n_classes, dev
             input_channel = 3
         elif args.dataset == "mnist":
             input_channel = 1
-        num_filters = [weights[0].shape[0], weights[2].shape[0]]
-        input_dim = weights[4].shape[0]
-        hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
-        matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
+
+        if args.dataset == "mnist":
+            num_filters = []
+            input_dim = weights[0].shape[0]
+            hidden_dims = [weights[0].shape[1], weights[2].shape[1], weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNMNIST(input_dim=input_dim, hidden_dims=hidden_dims, output_dim=10)
+        else:
+            num_filters = [weights[0].shape[0], weights[2].shape[0]]
+            input_dim = weights[4].shape[0]
+            hidden_dims = [weights[4].shape[1], weights[6].shape[1]]
+            matched_cnn = SimpleCNNContainer(input_channel=input_channel, 
                                         num_filters=num_filters, 
                                         kernel_size=5, 
                                         input_dim=input_dim, 
