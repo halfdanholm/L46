@@ -18,7 +18,9 @@ def main():
     model_1 = transformer.get_model(ntokens, emsize, d_hid, nlayers, nhead, dropout)
     model_2 = copy.deepcopy(model_1)
 
-    if sys.argv[1]:
+    print(model_1)
+
+    if len(sys.argv) > 1:
         model_1_trained = torch.load(f'{sys.argv[2]}/model_1.pt')
         model_2_trained = torch.load(f'{sys.argv[2]}/model_2.pt')
         model_1_trained.to(device)
