@@ -70,15 +70,15 @@ def get_best_permutation(true_weights, merge_weights, true_bias, merge_bias):
 def get_cost_matrix(true_weights, merge_weights, true_bias, merge_bias):
     n = true_weights.shape[1]
     cost_matrix = np.zeros((n, n))
-    for i in range(n):
-        for j in range(n):
-            cost_matrix[i, j] = cost(true_weights, merge_weights, true_bias, merge_bias, i, j)
+    for true_node in range(n):
+        for merge_node in range(n):
+            cost_matrix[true_node, merge_node] = cost(true_weights[:, true_node], merge_weights[:, merge_node], true_bias[true_node], merge_bias[merge_node])
     return cost_matrix
 
 
-def cost(true_weights, merge_weights, true_bias, merge_bias, true_node, merge_node):
+def cost(true_weights, merge_weights, true_bias, merge_bias):
     return weight_difference(
-        true_weights[:, true_node], merge_weights[:, merge_node], true_bias[true_node], merge_bias[merge_node]
+        true_weights, merge_weights, true_bias, merge_bias
     )
 
 

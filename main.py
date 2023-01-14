@@ -3,7 +3,7 @@ import merge
 import transformer
 import torch
 import sys
-
+import argparse
 
 def main():
     emsize = 64  # embedding dimension
@@ -13,21 +13,25 @@ def main():
     dropout = 0.2  # dropout probability
     ntokens = 28782  # size of vocabulary
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--checkpoint_folder", type=str, default="skip", help="Checkpoint Folder")
+    parser.add_argument("--data_type", type=str, default="hetero")
+    parser.add_argument("--epochs", type=int, default=4)
+    args = parser.parse_args()
+
     device = transformer.get_device()
-    data_1, data_2, val_data, _ = transformer.get_dataset_split(device)
+    data_1, data_2, val_data, _ = transformer.get_dataset_split(device, type=args.data_type, batch_size=args.batch_size)
     model_1 = transformer.get_model(ntokens, emsize, d_hid, nlayers, nhead, dropout)
     model_2 = copy.deepcopy(model_1)
 
-    print(model_1)
-
-    if len(sys.argv) > 1:
+    if args.checkpoint_folder != 'skip':
         model_1_trained = torch.load(f'{sys.argv[2]}/model_1.pt')
         model_2_trained = torch.load(f'{sys.argv[2]}/model_2.pt')
         model_1_trained.to(device)
         model_2_trained.to(device)
     else:
-        model_1_trained = transformer.train(model_1, data_1, device, name='1')
-        model_2_trained = transformer.train(model_2, data_2, device, name='2')
+        model_1_trained = transformer.train(model_1, data_1, device, name='1', epochs=args.epochs)
+        model_2_trained = transformer.train(model_2, data_2, device, name='2', epochs=args.epochs)
 
     print('loaded models')
 
