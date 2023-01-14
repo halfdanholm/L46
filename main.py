@@ -17,6 +17,7 @@ def main():
     parser.add_argument("-c", "--checkpoint_folder", type=str, default="skip", help="Checkpoint Folder")
     parser.add_argument("--data_type", type=str, default="hetero")
     parser.add_argument("--epochs", type=int, default=4)
+    parser.add_argument("--batch_size", type=int, default=20)
     args = parser.parse_args()
 
     device = transformer.get_device()
