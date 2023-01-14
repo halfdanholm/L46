@@ -1,7 +1,7 @@
 import copy
 import torch
 import numpy as np
-import scipy as sp
+from scipy import optimize
 
 
 def average_model(model_1, model_2):
@@ -63,7 +63,7 @@ Then uses linear sum assignment solver to find the best permutation
 """
 def get_best_permutation(true_weights, merge_weights, true_bias, merge_bias):
     cost_matrix = get_cost_matrix(true_weights, merge_weights, true_bias, merge_bias)
-    _, col_idx = sp.optimize.linear_sum_assignment(cost_matrix)
+    _, col_idx = optimize.linear_sum_assignment(cost_matrix)
     return col_idx
 
 
