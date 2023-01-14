@@ -26,15 +26,18 @@ def main():
     model_2 = copy.deepcopy(model_1)
 
     if args.checkpoint_folder != 'skip':
+        print('Loading checkpoint...')
         model_1_trained = torch.load(f'{sys.argv[2]}/model_1.pt')
         model_2_trained = torch.load(f'{sys.argv[2]}/model_2.pt')
         model_1_trained.to(device)
         model_2_trained.to(device)
     else:
+        print('Training model 1...')
         model_1_trained = transformer.train(model_1, data_1, device, name='1', epochs=args.epochs)
+        print('Training model 2...')
         model_2_trained = transformer.train(model_2, data_2, device, name='2', epochs=args.epochs)
 
-    print('loaded models')
+    print('got models')
 
     model_av = merge.average_model(model_1_trained, model_2_trained)
     model_av.to(device)
