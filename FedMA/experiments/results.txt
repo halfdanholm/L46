@@ -227,3 +227,84 @@ INFO:root:>> Training accuracy after local retrain: 0.951456
 INFO:root:>> Test accuracy after local retrain: 0.738000
 INFO:root:Accuracy for Neural Matching correct: 412, total: 500
 
+
+experiment 17:
+
+python main.py --model=simple-cnn --dataset=mnist --lr=0.01 --retrain_lr=0.01 --batch-size=64 --epochs=10 --retrain_epochs=10 --n_nets=5 --partition=hetero-dir --comm_type=fedma --comm_round=1 --retrain=False --rematching=True
+optimizer SGD
+
+INFO:root:Computing Uniform ensemble accuracy
+INFO:root:Uniform ensemble (Train acc): 0.7595
+INFO:root:Uniform ensemble (Test acc): 0.678
+
+Accuracy for Neural Matching correct: 318, total: 500
+INFO:root:Accuracy for Fed Averaging correct: 67, total: 500
+
+
+INFO:root:>> Pre-Training Training accuracy: 0.912458
+INFO:root:>> Pre-Training Test accuracy: 0.646000
+INFO:root:>> Training accuracy after local retrain: 0.905724
+INFO:root:>> Test accuracy after local retrain: 0.604000
+INFO:root:After retraining and rematching for comm. round: 0, we measure the accuracy ...
+INFO:root:Accuracy for Neural Matching correct: 347, total: 500
+
+
+experiment 18:
+
+python main.py --model=simple-cnn --dataset=mnist --lr=0.01 --retrain_lr=0.01 --batch-size=64 --epochs=10 --retrain_epochs=10 --n_nets=5 --partition=hetero-dir --comm_type=fedavg --comm_round=1 --retrain=False --rematching=True
+optimizer SGD
+
+INFO:root:Computing Uniform ensemble accuracy
+INFO:root:Uniform ensemble (Train acc): 0.7595
+INFO:root:Uniform ensemble (Test acc): 0.678
+
+Accuracy for Neural Matching correct: 318, total: 500
+INFO:root:Accuracy for Fed Averaging correct: 67, total: 500
+
+INFO:root:>> Pre-Training Training accuracy: 0.228956
+INFO:root:>> Pre-Training Test accuracy: 0.134000
+INFO:root:>> Training accuracy after local retrain: 0.518519
+INFO:root:>> Test accuracy after local retrain: 0.214000
+INFO:root:Accuracy for Neural Matching correct: 120, total: 500
+
+
+experiment 19:
+
+python main.py --model=simple-cnn --dataset=mnist --lr=0.01 --retrain_lr=0.01 --batch-size=64 --epochs=10 --retrain_epochs=10 --n_nets=10 --partition=hetero-dir --comm_type=fedma --comm_round=1 --retrain=False --rematching=True
+optimizer SGD
+train_size 6000
+
+INFO:root:Computing Uniform ensemble accuracy
+INFO:root:Uniform ensemble (Train acc): 0.3983333333333333
+INFO:root:Uniform ensemble (Test acc): 0.418
+
+INFO:root:Accuracy for Neural Matching correct: 79, total: 500
+INFO:root:Accuracy for Fed Averaging correct: 43, total: 500
+
+INFO:root:>> Pre-Training Training accuracy: 0.704797
+INFO:root:>> Pre-Training Test accuracy: 0.236000
+INFO:root:>> Training accuracy after local retrain: 0.690037
+INFO:root:>> Test accuracy after local retrain: 0.202000
+INFO:root:After retraining and rematching for comm. round: 0, we measure the accuracy ...
+INFO:root:Accuracy for Neural Matching correct: 129, total: 500
+
+experiment 20:
+
+python main.py --model=simple-cnn --dataset=mnist --lr=0.01 --retrain_lr=0.01 --batch-size=64 --epochs=10 --retrain_epochs=10 --n_nets=10 --partition=hetero-dir --comm_type=fedavg --comm_round=1 --retrain=False --rematching=True
+optimizer SGD
+train_size 6000
+
+
+INFO:root:Computing Uniform ensemble accuracy
+INFO:root:Uniform ensemble (Train acc): 0.3983333333333333
+INFO:root:Uniform ensemble (Test acc): 0.418
+
+INFO:root:Accuracy for Neural Matching correct: 79, total: 500
+INFO:root:Accuracy for Fed Averaging correct: 43, total: 500
+
+INFO:root:>> Pre-Training Training accuracy: 0.265683
+INFO:root:>> Pre-Training Test accuracy: 0.086000
+INFO:root:>> Training accuracy after local retrain: 0.431734
+INFO:root:>> Test accuracy after local retrain: 0.108000
+INFO:root:Accuracy for Neural Matching correct: 43, total: 500
+
