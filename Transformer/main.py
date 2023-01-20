@@ -31,8 +31,8 @@ def main():
 
     if args.checkpoints_folder != 'skip':
         print('Loading checkpoints...')
-        model_1_trained = torch.load(f'{sys.argv[2]}/model_1.pt')
-        model_2_trained = torch.load(f'{sys.argv[2]}/model_2.pt')
+        model_1_trained = torch.load(f'{sys.argv[2]}/model_1.pt', map_location=device)
+        model_2_trained = torch.load(f'{sys.argv[2]}/model_2.pt', map_location=device)
         model_1_trained.to(device)
         model_2_trained.to(device)
     else:
