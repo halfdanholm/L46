@@ -24,6 +24,7 @@ def main():
     data_1, data_2, val_data, _ = transformer.get_dataset_split(device, type=args.data_type, batch_size=args.batch_size)
     model_1 = transformer.get_model(ntokens, emsize, d_hid, nlayers, nhead, dropout)
     model_2 = copy.deepcopy(model_1)
+    print(model_1)
 
     if args.checkpoint_folder != 'skip':
         print('Loading checkpoint...')

@@ -196,9 +196,13 @@ def get_dataset_split(device, type='wiki', hetero_split=False, batch_size=20):
     test_data_penn = data_process(test_iter_penn, vocab, tokenizer)
 
     train_iter_wiki, val_iter_wiki, test_iter_wiki = torchtext.datasets.WikiText2()
-    train_data_wiki = data_process(train_iter_wiki, vocab, tokenizer)[:train_data_penn.shape[0]]
-    val_data_wiki = data_process(val_iter_wiki, vocab, tokenizer)[:val_data_penn.shape[0]]
-    test_data_wiki = data_process(test_iter_wiki, vocab, tokenizer)[:test_data_penn.shape[0]]
+    train_data_wiki = data_process(train_iter_wiki, vocab, tokenizer)
+    val_data_wiki = data_process(val_iter_wiki, vocab, tokenizer)
+    test_data_wiki = data_process(test_iter_wiki, vocab, tokenizer)
+    if not type == 'wiki':
+        train_data_wiki = train_data_wiki[:train_data_penn.shape[0]]
+        val_data_wiki = train_data_wiki[:val_data_penn.shape[0]]
+        test_data_wiki = train_data_wiki[:test_data_penn.shape[0]]
 
     eval_batch_size = 10
     train_data_wiki = batchify(train_data_wiki, batch_size, device)  # shape [seq_len, batch_size]

@@ -15,6 +15,10 @@ def average_model(model_1, model_2):
     return model_av
 
 
+def perturbed_embedding(model_1, model_2):
+
+
+
 def almost_average_model(model_1, model_2):
     weights_1 = model_1.state_dict()
     weights_2 = model_2.state_dict()
