@@ -33,20 +33,20 @@ def perturbed_embedding(model_1, model_2):
     decoder_1 = weights_1['decoder.weight']
     decoder_2 = weights_2['decoder.weight']
 
-    embedding_permutation = get_best_permutation(embedding_1.T, embedding_2.T)
+    embedding_permutation = get_best_permutation(embedding_1, embedding_2)
     decoder_permutation = get_best_permutation(decoder_1, decoder_2)
 
     print('permuted nodes in embedding', np.count_nonzero(embedding_permutation - np.arange(embedding_permutation.shape[0])))
     print('permuted nodes in decoder', np.count_nonzero(decoder_permutation - np.arange(decoder_permutation.shape[0])))
 
-    permuted_embedding = permute_weights_in(embedding_permutation, [embedding_2])
-    permuted_decoder = permute_weights_out(decoder_permutation, [decoder_2])
+    permuted_embedding = permute_weights_out(embedding_permutation, embedding_2)
+    permuted_decoder = permute_weights_out(decoder_permutation, decoder_2)
 
-    av_embedding = (embedding_1 + permuted_embedding[0]) / 2
-    av_decoder = (decoder_1 + permuted_decoder[0]) / 2
+    av_embedding = (embedding_1 + permuted_embedding) / 2
+    av_decoder = (decoder_1 + permuted_decoder) / 2
 
     # loads the permuted weights into the model
-    weights_av['embedding.weight'] = av_embedding
+    weights_av['encoder.weight'] = av_embedding
     weights_av['decoder.weight'] = av_decoder
     model_av.load_state_dict(weights_av)
     return model_av
