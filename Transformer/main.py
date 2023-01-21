@@ -45,7 +45,7 @@ def main():
 
     model_merge = copy.deepcopy(model_2_trained)
     model_merge.to(device)
-    merge.average_model(model_1_trained, model_merge)
+    merge.almost_average_model(model_1_trained, model_merge)
 
     model_av = merge.average_model(model_1_trained, model_2_trained)
     model_av.to(device)
