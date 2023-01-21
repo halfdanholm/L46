@@ -43,11 +43,9 @@ def main():
 
     print('Got models')
 
-    model_embedded = merge.perturbed_embedding(model_1_trained, model_2_trained)
-    model_embedded.to(device)
-
-    model_aav = merge.almost_average_model(model_1_trained, model_2_trained)
-    model_aav.to(device)
+    model_merge = copy.deepcopy(model_2_trained)
+    model_merge.to(device)
+    merge.average_model(model_1_trained, model_merge)
 
     model_av = merge.average_model(model_1_trained, model_2_trained)
     model_av.to(device)
@@ -56,10 +54,10 @@ def main():
     print(f'Loss 1: {loss_1}')
     loss_2 = transformer.evaluate(model_2_trained, val_data, device)
     print(f'Loss 2: {loss_2}')
+    loss_merge = transformer.evaluate(model_merge, val_data, device)
+    print(f'Loss merge: {loss_merge}')
     loss_av = transformer.evaluate(model_av, val_data, device)
     print(f'Loss average: {loss_av}')
-    loss_aav = transformer.evaluate(model_aav, val_data, device)
-    print(f'Loss almost average: {loss_aav}')
 
 
 if __name__ == '__main__':

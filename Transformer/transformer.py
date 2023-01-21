@@ -177,6 +177,6 @@ def train(model: torch.nn.Module, train_data, device, name: str = "1", epochs: i
     for epoch in range(1, epochs + 1):
         train_epoch(model, ntokens, epoch, criterion, optimizer, scheduler, train_data, bptt, device)
         scheduler.step()
-    torch.save(model, f'checkpoints/model_{name}.pt')
+    torch.save(model, f'model_{name}.pt')
 
     return model
