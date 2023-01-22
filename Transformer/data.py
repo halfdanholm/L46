@@ -29,7 +29,7 @@ def get_dataset_split(device, type='wiki', hetero_split=False, batch_size=20):
         val_data_wiki = train_data_wiki[:val_data_penn.shape[0]]
         test_data_wiki = train_data_wiki[:test_data_penn.shape[0]]
 
-    eval_batch_size = 10
+    eval_batch_size = 2
     train_data_wiki = batchify(train_data_wiki, batch_size, device)  # shape [seq_len, batch_size]
     val_data_wiki = batchify(val_data_wiki, eval_batch_size, device)
     test_data_wiki = batchify(test_data_wiki, eval_batch_size, device)

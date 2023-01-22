@@ -19,13 +19,16 @@ def almost_average_model(model_true, model_permute):
     permute_layer_by_ids(
         model_true,
         model_permute,
-        [f'transformer_encoder.layers.7.linear1.weight', f'transformer_encoder.layers.7.linear1.bias'],
+        [f'transformer_encoder.layers.7.linear2.weight', f'transformer_encoder.layers.7.linear1.bias'],
         [f'transformer_encoder.layers.7.linear1.weight', f'transformer_encoder.layers.7.linear1.bias'],
         [f'transformer_encoder.layers.7.linear2.weight'],
+        transpose_determiner=True
     )
 
 
-def permute_model(model_true, model_permute):
+def permute_model(device, model_true, model_permute_in):
+    model_permute = copy.deepcopy(model_permute_in)
+    model_permute.to(device)
     permute_layer_by_ids(
         model_true,
         model_permute,
@@ -34,7 +37,7 @@ def permute_model(model_true, model_permute):
         ['transformer_encoder.layers.0.self_attn.in_proj_weight', 'encoder.weight'],
         transpose_determiner=True
     )
-    max_layer = 8
+    max_layer = 1
     for layer in range(max_layer):
         permute_queries_and_keys(model_true, model_permute, layer)
         permute_value_layer(model_true, model_permute, layer)
@@ -64,10 +67,11 @@ def permute_model(model_true, model_permute):
             permute_layer_by_ids(
                 model_true,
                 model_permute,
-                [f'transformer_encoder.layers.{max_layer}.linear2.weight', f'transformer_encoder.layers.{max_layer}.linear2.bias'],
-                [f'transformer_encoder.layers.{max_layer}.linear2.weight', f'transformer_encoder.layers.{max_layer}.linear2.bias'],
+                [f'transformer_encoder.layers.{max_layer - 1}.linear2.weight', f'transformer_encoder.layers.{max_layer - 1}.linear2.bias'],
+                [f'transformer_encoder.layers.{max_layer - 1}.linear2.weight', f'transformer_encoder.layers.{max_layer - 1}.linear2.bias'],
                 ['decoder.weight'],
             )
+    return model_permute
 
 
 def permute_layer_by_ids(
@@ -86,8 +90,15 @@ def permute_layer_by_ids(
         weights_determined_true = weights_true[weights_determined_id]
         weights_determined_permute = weights_permute[weights_determined_id]
         if transpose_determiner:
-            weights_determined_true = weights_determined_true.T
-            weights_determined_permute = weights_determined_permute.T
+            if len(weights_determined_true.shape) == 2:
+                weights_determined_true = weights_determined_true.T
+                weights_determined_permute = weights_determined_permute.T
+            elif len(weights_determined_true.shape) == 1:
+                pass
+                # weights_determined_true = weights_determined_true.reshape(1, -1)
+                # weights_determined_permute = weights_determined_permute.reshape(1, -1)
+            else:
+                raise ValueError('Unknown shape')
         weights_determined.append((weights_determined_true, weights_determined_permute))
     for weights in weights_affected_rows_ids:
         weights_affected_rows.append(weights_permute[weights])
@@ -147,6 +158,7 @@ def permute_queries_and_keys(model_true, model_permute, layer):
 
     model_permute.state_dict()[qvk_matrix_id] = qvk_matrix_permute
     model_permute.state_dict()[qvk_matrix_bias_id] = qvk_matrix_bias_permute
+    return model_permute
 
 
 def permute_value_layer(model_true, model_permute, layer):
@@ -191,7 +203,7 @@ def permute_value_layer(model_true, model_permute, layer):
 def permute_layer(weights_pairs_determined, weights_affected_rows, weights_affected_columns):
     # determining permutation
     permutation = get_best_permutation(weights_pairs_determined)
-    print('permuted nodes in embedding',
+    print('permuted nodes ',
           np.count_nonzero(permutation - np.arange(permutation.shape[0])))
 
     # weights that need to be permuted

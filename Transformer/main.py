@@ -8,10 +8,10 @@ import data
 
 
 def main():
-    emsize = 64  # embedding dimension
-    d_hid = 64  # dimension of the feedforward network model in nn.TransformerEncoder
-    nlayers = 128  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
-    nhead = 8  # number of heads in nn.MultiheadAttention
+    emsize = 4  # embedding dimension
+    d_hid = 4  # dimension of the feedforward network model in nn.TransformerEncoder
+    nlayers = 1  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
+    nhead = 2  # number of heads in nn.MultiheadAttention
     dropout = 0.2  # dropout probability
     ntokens = 28782  # size of vocabulary
 
@@ -25,9 +25,10 @@ def main():
     device = transformer.get_device()
     data_1_orig, data_2_orig, val_data_orig, _ = data.get_original_dataset_split(device)
     data_1, data_2, val_data, _ = data.get_dataset_split(device, type=args.data_type, batch_size=args.batch_size)
-    model_1 = transformer.get_model(ntokens, emsize, d_hid, nlayers, nhead, dropout)
-    model_2 = copy.deepcopy(model_1)
+    model_1 = transformer.get_model(ntokens, emsize, nhead, d_hid, nlayers, dropout)
+    model_2 = transformer.get_model(ntokens, emsize, nhead, d_hid, nlayers, dropout)
     print(model_1)
+    val_data = val_data[:36]
 
     if args.checkpoints_folder != 'skip':
         print('Loading checkpoints...')
@@ -43,21 +44,22 @@ def main():
 
     print('Got models')
 
-    model_merge = copy.deepcopy(model_2_trained)
-    model_merge.to(device)
-    merge.almost_average_model(model_1_trained, model_merge)
+    model_permuted = merge.permute_model(device, model_1_trained, model_2_trained)
+    model_permuted.to(device)
+
+    # Don't forget to actually merge the models
 
     model_av = merge.average_model(model_1_trained, model_2_trained)
     model_av.to(device)
 
-    loss_1 = transformer.evaluate(model_1_trained, val_data, device)
-    print(f'Loss 1: {loss_1}')
+    #loss_1 = transformer.evaluate(model_1_trained, val_data, device)
+    #print(f'Loss 1: {loss_1}')
     loss_2 = transformer.evaluate(model_2_trained, val_data, device)
     print(f'Loss 2: {loss_2}')
-    loss_merge = transformer.evaluate(model_merge, val_data, device)
+    loss_merge = transformer.evaluate(model_permuted, val_data, device)
     print(f'Loss merge: {loss_merge}')
-    loss_av = transformer.evaluate(model_av, val_data, device)
-    print(f'Loss average: {loss_av}')
+    #loss_av = transformer.evaluate(model_av, val_data, device)
+    #print(f'Loss average: {loss_av}')
 
 
 if __name__ == '__main__':

@@ -38,9 +38,13 @@ class TransformerModel(torch.nn.Module):
             output Tensor of shape [seq_len, batch_size, ntoken]
         """
         src = self.encoder(src) * math.sqrt(self.d_model)
+        print("src 0", list(np.array(src[:, 0, :].cpu()).tolist()))
         src = self.pos_encoder(src)
+        print("src 1", list(np.array(src[:, 0, :].cpu()).tolist()))
         output = self.transformer_encoder(src, src_mask)
+        print("output 0", list(np.array(output[:, 0, :].cpu()).tolist()))
         output = self.decoder(output)
+        #print("output 1", list(np.array(output[:, 0, :].cpu()).tolist()))
         return output
 
 
