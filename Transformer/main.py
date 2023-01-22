@@ -9,9 +9,9 @@ import data
 
 def main():
     emsize = 4  # embedding dimension
-    d_hid = 4  # dimension of the feedforward network model in nn.TransformerEncoder
+    d_hid = 3  # dimension of the feedforward network model in nn.TransformerEncoder
     nlayers = 1  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
-    nhead = 2  # number of heads in nn.MultiheadAttention
+    nhead = 1  # number of heads in nn.MultiheadAttention
     dropout = 0.2  # dropout probability
     ntokens = 28782  # size of vocabulary
 
@@ -26,7 +26,7 @@ def main():
     data_1_orig, data_2_orig, val_data_orig, _ = data.get_original_dataset_split(device)
     data_1, data_2, val_data, _ = data.get_dataset_split(device, type=args.data_type, batch_size=args.batch_size)
     model_1 = transformer.get_model(ntokens, emsize, nhead, d_hid, nlayers, dropout)
-    model_2 = copy.deepcopy(model_1)
+    model_2 = transformer.get_model(ntokens, emsize, nhead, d_hid, nlayers, dropout)
     print(model_1)
     val_data = val_data[:100]
 
@@ -44,8 +44,16 @@ def main():
 
     print('Got models')
 
+    torch.set_printoptions(profile="full")
+    #print(model_2_trained.state_dict())
+    torch.set_printoptions(profile="default")
+
     model_permuted = merge.permute_model(device, model_1_trained, model_2_trained)
     model_permuted.to(device)
+
+    torch.set_printoptions(profile="full")
+    #print(model_permuted.state_dict())
+    torch.set_printoptions(profile="default")
 
     model_merged = merge.average_model(model_1_trained, model_permuted)
     model_merged.to(device)
@@ -53,16 +61,16 @@ def main():
     model_av = merge.average_model(model_1_trained, model_2_trained)
     model_av.to(device)
 
-    loss_1 = transformer.evaluate(model_1_trained, val_data, device)
-    print(f'Loss 1: {loss_1}')
+    #loss_1 = transformer.evaluate(model_1_trained, val_data, device)
+    #print(f'Loss 1: {loss_1}')
     loss_2 = transformer.evaluate(model_2_trained, val_data, device)
     print(f'Loss 2: {loss_2}')
     loss_permuted = transformer.evaluate(model_permuted, val_data, device)
     print(f'Loss permuted: {loss_permuted}')
-    loss_merged = transformer.evaluate(model_merged, val_data, device)
-    print(f'Loss merged: {loss_merged}')
-    loss_av = transformer.evaluate(model_av, val_data, device)
-    print(f'Loss average: {loss_av}')
+    #loss_merged = transformer.evaluate(model_merged, val_data, device)
+    #print(f'Loss merged: {loss_merged}')
+    #loss_av = transformer.evaluate(model_av, val_data, device)
+    #print(f'Loss average: {loss_av}')
 
 
 if __name__ == '__main__':
