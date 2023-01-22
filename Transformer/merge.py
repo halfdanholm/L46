@@ -63,14 +63,14 @@ def permute_model(device, model_true, model_permute_in):
                 [f'transformer_encoder.layers.{layer}.linear2.weight', f'transformer_encoder.layers.{layer}.linear2.bias'],
                 [f'transformer_encoder.layers.{layer + 1}.self_attn.in_proj_weight'],
             )
-        else:
+        """else:
             permute_layer_by_ids(
                 model_true,
                 model_permute,
                 [f'transformer_encoder.layers.{max_layer - 1}.linear2.weight', f'transformer_encoder.layers.{max_layer - 1}.linear2.bias'],
                 [f'transformer_encoder.layers.{max_layer - 1}.linear2.weight', f'transformer_encoder.layers.{max_layer - 1}.linear2.bias'],
                 ['decoder.weight'],
-            )
+            )"""
     return model_permute
 
 
