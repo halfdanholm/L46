@@ -8,8 +8,8 @@ import data
 
 
 def main():
-    emsize = 4  # embedding dimension
-    d_hid = 3  # dimension of the feedforward network model in nn.TransformerEncoder
+    emsize = 8  # embedding dimension
+    d_hid = 16  # dimension of the feedforward network model in nn.TransformerEncoder
     nlayers = 1  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
     nhead = 1  # number of heads in nn.MultiheadAttention
     dropout = 0.2  # dropout probability
