@@ -170,11 +170,11 @@ def get_device():
     return torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.has_mps else 'cpu')
 
 
-def train(model: torch.nn.Module, train_data, device, name: str = "1", epochs: int = 1, ntokens: int = 28782) -> torch.nn.Module:
+def train(model: torch.nn.Module, train_data, device, name: str = "1", epochs: int = 1, ntokens: int = 28782, lr: int = 5.0) -> torch.nn.Module:
     criterion = torch.nn.CrossEntropyLoss()
-    lr = 5.0  # learning rate
     optimizer = torch.optim.SGD(model.parameters(), lr=lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.95)
+    gamma = (0.03 / lr) ** (1 / epochs)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=gamma)
     bptt = 35
 
     model.to(device)

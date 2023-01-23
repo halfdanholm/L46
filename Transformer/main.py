@@ -21,6 +21,7 @@ def main():
     parser.add_argument("--epochs", type=int, default=4)
     parser.add_argument("--batch_size", type=int, default=20)
     parser.add_argument("--diff_init", action="store_true")
+    parser.add_argument("--lr", type=int, default=5.0)
     args = parser.parse_args()
 
     device = transformer.get_device()
@@ -41,9 +42,9 @@ def main():
         else:
             model_2 = copy.deepcopy(model_1)
         print('Training model 1...')
-        model_1_trained = transformer.train(model_1, data_1, device, name='1', epochs=args.epochs)
+        model_1_trained = transformer.train(model_1, data_1, device, name='1', epochs=args.epochs, lr=args.lr)
         print('Training model 2...')
-        model_2_trained = transformer.train(model_2, data_2, device, name='2', epochs=args.epochs)
+        model_2_trained = transformer.train(model_2, data_2, device, name='2', epochs=args.epochs, lr=args.lr)
 
     print(model_1_trained)
     print('Got models')
