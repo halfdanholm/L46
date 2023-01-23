@@ -51,15 +51,7 @@ def permute_model(device, model_true, model_permute_in):
     max_layer = 1
     for layer in range(max_layer):
         permute_queries_and_keys(model_true, model_permute, layer)
-        #permute_value_layer(model_true, model_permute, layer)
-        """permute_layer_by_ids(
-            model_true,
-            model_permute,
-            [f'transformer_encoder.layers.{layer}.self_attn.out_proj.weight', f'transformer_encoder.layers.{layer}.self_attn.out_proj.bias'],
-            [f'transformer_encoder.layers.{layer}.self_attn.out_proj.weight', f'transformer_encoder.layers.{layer}.self_attn.out_proj.bias'],
-            [f'transformer_encoder.layers.{layer}.linear1.weight'],
-            []
-        )"""
+        permute_value_layer(model_true, model_permute, layer)
         permute_layer_by_ids(
             model_true,
             model_permute,
@@ -218,15 +210,12 @@ def permute_value_layer(model_true, model_permute, layer):
     v_matrix_bias_permute = v_matrix_bias_permute[2 * v_matrix_bias_permute.shape[0] // 3:]
 
     affected_next_layer_id = 'transformer_encoder.layers.' + str(layer) + '.self_attn.out_proj.weight'
-    affected_next_layer_true = weights_true[affected_next_layer_id]
-    affected_next_layer_permute = weights_permute[affected_next_layer_id]
-    affected_next_layer_bias_id = 'transformer_encoder.layers.' + str(layer) + '.self_attn.out_proj.bias'
-    affected_next_layer_bias_true = weights_true[affected_next_layer_bias_id]
-    affected_next_layer_bias_permute = weights_permute[affected_next_layer_bias_id]
+    affected_next_layer_permute = model_permute.state_dict()[affected_next_layer_id]
 
     weights_affected_rows, weights_affected_columns, _ = permute_layer(
         [
-            (affected_next_layer_true.T, affected_next_layer_permute.T)
+            (v_matrix_true, v_matrix_permute),
+            (v_matrix_bias_true, v_matrix_bias_permute)
         ],
         [
             v_matrix_permute,
@@ -234,9 +223,8 @@ def permute_value_layer(model_true, model_permute, layer):
         ],
         [
             affected_next_layer_permute,
-            affected_next_layer_bias_permute.reshape(1, -1)
         ],
-        [],
+        []
     )
 
     v_matrix_permute, v_matrix_bias_permute = weights_affected_rows
@@ -246,7 +234,6 @@ def permute_value_layer(model_true, model_permute, layer):
     weights_permute[v_matrix_id] = v_matrix_permute
     weights_permute[v_matrix_bias_id] = v_matrix_bias_permute
     weights_permute[affected_next_layer_id] = weights_affected_columns[0]
-    weights_permute[affected_next_layer_bias_id] = weights_affected_columns[1].reshape(-1)
 
     model_permute.load_state_dict(weights_permute)
 
