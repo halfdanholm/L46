@@ -26,29 +26,34 @@ def almost_average_model(model_true, model_permute):
     )
 
 
+def flatten_list(l):
+    return [item for sublist in l for item in sublist]
+
+
 def permute_model(device, model_true, model_permute_in):
     model_permute = copy.deepcopy(model_permute_in)
     model_permute.to(device)
+    max_layer = (len(model_true.state_dict()) - 4) // 12
+    print('max_layer', max_layer)
     permute_layer_by_ids(
         model_true,
         model_permute,
         ['encoder.weight'],
-        [
-            'transformer_encoder.layers.0.self_attn.out_proj.weight',
-            'transformer_encoder.layers.0.self_attn.out_proj.bias',
-            'transformer_encoder.layers.0.linear2.weight',
-            'transformer_encoder.layers.0.linear2.bias'
-        ],
-        [
-            'transformer_encoder.layers.0.self_attn.in_proj_weight',
+        flatten_list([[
+            f'transformer_encoder.layers.{layer}.self_attn.out_proj.weight',
+            f'transformer_encoder.layers.{layer}.self_attn.out_proj.bias',
+            f'transformer_encoder.layers.{layer}.linear2.weight',
+            f'transformer_encoder.layers.{layer}.linear2.bias'
+        ] for layer in range(max_layer)]),
+        flatten_list([[
+            f'transformer_encoder.layers.{layer}.self_attn.in_proj_weight',
             'encoder.weight',
-            'transformer_encoder.layers.0.linear1.weight',
+            f'transformer_encoder.layers.{layer}.linear1.weight',
             'decoder.weight'
-        ],
+        ] for layer in range(max_layer)]),
         ['pos_encoder.pe'],
         transpose_determiner=True
     )
-    max_layer = 1
     for layer in range(max_layer):
         permute_queries_and_keys(model_true, model_permute, layer)
         permute_value_layer(model_true, model_permute, layer)
@@ -60,26 +65,6 @@ def permute_model(device, model_true, model_permute_in):
             [f'transformer_encoder.layers.{layer}.linear2.weight'],
             []
         )
-        if (layer + 1) < max_layer:
-            pass
-            """permute_layer_by_ids(
-                model_true,
-                model_permute,
-                [f'transformer_encoder.layers.{layer}.linear2.weight', f'transformer_encoder.layers.{layer}.linear2.bias'],
-                [f'transformer_encoder.layers.{layer}.linear2.weight', f'transformer_encoder.layers.{layer}.linear2.bias'],
-                [f'transformer_encoder.layers.{layer + 1}.self_attn.in_proj_weight'],
-                []
-            )"""
-        else:
-            pass
-            """permute_layer_by_ids(
-                model_true,
-                model_permute,
-                [f'transformer_encoder.layers.{max_layer - 1}.linear2.weight', f'transformer_encoder.layers.{max_layer - 1}.linear2.bias'],
-                [f'transformer_encoder.layers.{max_layer - 1}.linear2.weight', f'transformer_encoder.layers.{max_layer - 1}.linear2.bias'],
-                ['decoder.weight'],
-                []
-            )"""
     return model_permute
 
 
