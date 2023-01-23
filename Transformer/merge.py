@@ -43,7 +43,12 @@ def permute_model(device, model_true, model_permute_in):
             f'transformer_encoder.layers.{layer}.self_attn.out_proj.weight',
             f'transformer_encoder.layers.{layer}.self_attn.out_proj.bias',
             f'transformer_encoder.layers.{layer}.linear2.weight',
-            f'transformer_encoder.layers.{layer}.linear2.bias'
+            f'transformer_encoder.layers.{layer}.linear2.bias',
+            f'transformer_encoder.layers.{layer}.linear1.weight',
+            f'transformer_encoder.layers.{layer}.norm1.weight',
+            f'transformer_encoder.layers.{layer}.norm1.bias',
+            f'transformer_encoder.layers.{layer}.norm2.weight',
+            f'transformer_encoder.layers.{layer}.norm2.bias',
         ] for layer in range(max_layer)]),
         flatten_list([[
             f'transformer_encoder.layers.{layer}.self_attn.in_proj_weight',
@@ -90,8 +95,6 @@ def permute_layer_by_ids(
                 weights_determined_permute = weights_determined_permute.T
             elif len(weights_determined_true.shape) == 1:
                 pass
-                # weights_determined_true = weights_determined_true.reshape(1, -1)
-                # weights_determined_permute = weights_determined_permute.reshape(1, -1)
             else:
                 raise ValueError('Unknown shape')
         weights_determined.append((weights_determined_true, weights_determined_permute))
@@ -128,23 +131,16 @@ def permute_queries_and_keys(model_true, model_permute, layer):
     qvk_matrix_permute = weights_permute[qvk_matrix_id]
     q_matrix_true = qvk_matrix_true[:qvk_matrix_true.shape[0] // 3]
     k_matrix_true = qvk_matrix_true[qvk_matrix_true.shape[0] // 3:2 * qvk_matrix_true.shape[0] // 3]
-    #v_matrix_true = qvk_matrix_true[2 * qvk_matrix_true.shape[0] // 3:]
     q_matrix_permute = qvk_matrix_permute[:qvk_matrix_permute.shape[0] // 3]
     k_matrix_permute = qvk_matrix_permute[qvk_matrix_permute.shape[0] // 3:2 * qvk_matrix_permute.shape[0] // 3]
-    #v_matrix_permute = qvk_matrix_permute[2 * qvk_matrix_permute.shape[0] // 3:]
 
     qvk_matrix_bias_id = 'transformer_encoder.layers.' + str(layer) + '.self_attn.in_proj_bias'
     qvk_matrix_bias_true = weights_true[qvk_matrix_bias_id]
     qvk_matrix_bias_permute = weights_permute[qvk_matrix_bias_id]
     q_matrix_bias_true = qvk_matrix_bias_true[:qvk_matrix_bias_true.shape[0] // 3]
     k_matrix_bias_true = qvk_matrix_bias_true[qvk_matrix_bias_true.shape[0] // 3:2 * qvk_matrix_bias_true.shape[0] // 3]
-    #v_matrix_bias_true = qvk_matrix_bias_true[2 * qvk_matrix_bias_true.shape[0] // 3:]
     q_matrix_bias_permute = qvk_matrix_bias_permute[:qvk_matrix_bias_permute.shape[0] // 3]
     k_matrix_bias_permute = qvk_matrix_bias_permute[qvk_matrix_bias_permute.shape[0] // 3:2 * qvk_matrix_bias_permute.shape[0] // 3]
-    #v_matrix_bias_permute = qvk_matrix_bias_permute[2 * qvk_matrix_bias_permute.shape[0] // 3:]
-
-    affected_next_layer_id = 'transformer_encoder.layers.' + str(layer) + '.self_attn.out_proj.weight'
-    affected_next_layer_permute = model_permute.state_dict()[affected_next_layer_id]
 
     weights_affected_rows, weights_affected_columns, _ = permute_layer(
         [
@@ -163,17 +159,12 @@ def permute_queries_and_keys(model_true, model_permute, layer):
         [],
     )
 
-    #q_matrix_permute, k_matrix_permute, v_matrix_permute, q_matrix_bias_permute, k_matrix_bias_permute, v_matrix_bias_permute = weights_affected_rows
-    #qvk_matrix_permute = torch.cat((q_matrix_permute, k_matrix_permute, v_matrix_permute), dim=0)
-    #qvk_matrix_bias_permute = torch.cat((q_matrix_bias_permute, k_matrix_bias_permute, v_matrix_bias_permute), dim=0)
-
     q_matrix_permute, k_matrix_permute, q_matrix_bias_permute, k_matrix_bias_permute = weights_affected_rows
     qvk_matrix_permute = torch.cat((q_matrix_permute, k_matrix_permute, qvk_matrix_permute[2 * qvk_matrix_permute.shape[0] // 3:]), dim=0)
     qvk_matrix_bias_permute = torch.cat((q_matrix_bias_permute, k_matrix_bias_permute, qvk_matrix_bias_permute[2 * qvk_matrix_bias_permute.shape[0] // 3:]), dim=0)
 
     weights_permute[qvk_matrix_id] = qvk_matrix_permute
     weights_permute[qvk_matrix_bias_id] = qvk_matrix_bias_permute
-    #weights_permute[affected_next_layer_id] = weights_affected_columns[0]
 
     model_permute.load_state_dict(weights_permute)
 
