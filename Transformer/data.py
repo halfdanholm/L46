@@ -49,7 +49,7 @@ def get_dataset_split(device, type='wiki', hetero_split=False, batch_size=20):
     elif type == 'hetero':
         data_1 = train_data_wiki
         data_2 = train_data_penn
-        val_data = torch.cat((val_data_wiki, val_data_penn), dim=1)
+        val_data = torch.cat((val_data_wiki[:210], val_data_penn[:210]), dim=1)
         test_data = torch.cat((test_data_wiki, test_data_penn), dim=1)
     else:
         raise ValueError('Invalid type')

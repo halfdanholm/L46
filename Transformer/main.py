@@ -8,8 +8,8 @@ import data
 
 
 def main():
-    emsize = 4  # embedding dimension
-    d_hid = 6  # dimension of the feedforward network model in nn.TransformerEncoder
+    emsize = 8  # embedding dimension
+    d_hid = 16  # dimension of the feedforward network model in nn.TransformerEncoder
     nlayers = 1  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
     nhead = 1  # number of heads in nn.MultiheadAttention
     dropout = 0.2  # dropout probability
@@ -27,7 +27,6 @@ def main():
     device = transformer.get_device()
     data_1_orig, data_2_orig, val_data_orig, _ = data.get_original_dataset_split(device)
     data_1, data_2, val_data, _ = data.get_dataset_split(device, type=args.data_type, batch_size=args.batch_size)
-    val_data = val_data[:100]
 
     if args.checkpoints_folder != 'skip':
         print('Loading checkpoints...')
