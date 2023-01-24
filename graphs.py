@@ -62,8 +62,8 @@ def learning_rate():
 
 def loss_diff_graph():
     x = ["5", "20", "50"]
-    y_small = [9.976011e-05, 0.0001097255, 0.0007338379]
-    y_large = [0.0006620137, -0.007864682, -0.0001157317]
+    y_small = [6.991565829829166-6.991403219232149, 6.996318292389646-6.995982950383967, 7.018353001352702-7.017941461225446]
+    y_large = [7.0074780204079365-7.006747010792272, 7.00932456203625-7.0098701664135215, 6.9949065874638165-6.995191186238704]
     # put embedding plot on top
     plt.plot(x, y_small, label='Small Model')
     plt.plot(x, y_large, label='Big Model')
@@ -74,4 +74,4 @@ def loss_diff_graph():
 
 
 if __name__ == '__main__':
-    learning_rate()
+    loss_diff_graph()

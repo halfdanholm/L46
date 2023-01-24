@@ -9,7 +9,7 @@ python3 main.py
 Run by using models ``model_1.pt`` and ``model_2.pt`` in folder ``checkpoints``
 
 ``` bash
-python3 main.py --folder checkpoints
+python3 main.py --c checkpoints
 ```
 
 ## Attribution
